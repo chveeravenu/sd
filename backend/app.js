@@ -6,6 +6,7 @@ var logger = require('morgan');
 const authRouter = require('./routes/authRouter');
 const courseRouter = require('./routes/courseRouter');
 const userRouter = require('./routes/userRouter');
+const ticketRouter = require('./routes/ticketRouter')
 const cors = require('cors');
 const BodyParser = require('body-parser');
 
@@ -31,6 +32,7 @@ app.use(BodyParser.json());
 app.use("/auth", authRouter);
 app.use("/courses", courseRouter);
 app.use("/user", userRouter);
+app.use("/tickets",ticketRouter);
 
 app.use(logger('dev'));
 app.use(express.json());
