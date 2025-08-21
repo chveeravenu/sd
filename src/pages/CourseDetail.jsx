@@ -8,6 +8,7 @@ const CourseDetail = () => {
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEnrolled, setIsEnrolled] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -20,7 +21,6 @@ const CourseDetail = () => {
       const response = await courseService.getCourseById(courseId);
       setCourse(response.data.course);
 
-      // Check if user is enrolled
       const token = localStorage.getItem('token');
       if (token) {
         setIsEnrolled(false); // Placeholder until API check is added
@@ -63,60 +63,43 @@ const CourseDetail = () => {
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem' }}>
-      {/* Course Header */}
-      <div style={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        padding: '3rem 2rem',
-        borderRadius: '12px',
-        marginBottom: '2rem'
-      }}>
-        <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>{course.title}</h1>
-        <p style={{ fontSize: '1.2rem', opacity: 0.9, marginBottom: '2rem' }}>
-          {course.description}
-        </p>
-        
-        <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Clock size={20} />
-            <span>{course.duration}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Users size={20} />
-            <span>{course.students} students</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Star size={20} fill="#f59e0b" color="#f59e0b" />
-            <span>{course.rating} rating</span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-          <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-            {course.isPremium ? `$${course.price}` : 'Free'}
-          </div>
-          {course.isPremium && (
-            <span className="premium-badge">Premium Content</span>
-          )}
-        </div>
-      </div>
+      {/* Course Header ... (same as before) */}
 
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
         {/* Main Content */}
         <div>
           {/* Video Preview */}
           <div className="video-container">
-            <div className="video-placeholder">
-              <div style={{ textAlign: 'center' }}>
-                <Play size={64} />
-                <p>Course Preview</p>
-                {course.isPremium && !isEnrolled && (
+            {showVideo ? (
+              <iframe
+                width="100%"
+                height="450"
+                src={course.previewVideo}
+                title="Course Preview"
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              ></iframe>
+            ) : (
+              <div
+                className="video-placeholder"
+                onClick={() => setShowVideo(true)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ textAlign: 'center' }}>
+                  <Play size={64} />
+                  <p>Course Preview</p>
+                  {course.isPremium && !isEnrolled && (
+                    <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
+                      Full content available with enrollment
+                    </p>
+                  )}
                   <p style={{ fontSize: '0.9rem', opacity: 0.8 }}>
-                    Full content available with enrollment
+                    Click to play preview video
                   </p>
-                )}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Course Description */}

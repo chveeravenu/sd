@@ -19,6 +19,7 @@ const sampleCourses = [
     level: 'beginner',
     rating: 4.8,
     students: 15420,
+    previewVideo: 'https://www.youtube.com/embed/-mJFZp84TIY',
     modules: [
       {
         title: 'HTML & CSS Fundamentals',
@@ -51,6 +52,7 @@ const sampleCourses = [
     level: 'beginner',
     rating: 4.6,
     students: 8750,
+    previewVideo: 'https://www.youtube.com/embed/rfscVS0vtbw',
     modules: [
       {
         title: 'Python Basics',
@@ -75,6 +77,7 @@ const sampleCourses = [
     level: 'intermediate',
     rating: 4.9,
     students: 5240,
+    previewVideo: 'https://www.youtube.com/embed/ua-CiDNNj30',
     modules: [
       {
         title: 'Data Analysis Fundamentals',
@@ -99,6 +102,7 @@ const sampleCourses = [
     level: 'beginner',
     rating: 4.7,
     students: 12340,
+    previewVideo: 'https://www.youtube.com/embed/2TR5I1cE1Yg',
     modules: [
       {
         title: 'Design Fundamentals',
@@ -117,7 +121,7 @@ const courseController = {
     try {
       // In a real app, this would fetch from database
       // const courses = await Course.find().sort({ createdAt: -1 });
-      
+
       res.json({
         message: 'Courses fetched successfully',
         courses: sampleCourses
@@ -131,12 +135,12 @@ const courseController = {
   getCourseById: async (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // In a real app, this would fetch from database
       // const course = await Course.findById(id);
-      
+
       const course = sampleCourses.find(c => c._id === id);
-      
+
       if (!course) {
         return res.status(404).json({ message: 'Course not found' });
       }
@@ -154,12 +158,12 @@ const courseController = {
   getCoursesByCategory: async (req, res) => {
     try {
       const { category } = req.params;
-      
+
       // In a real app, this would fetch from database
       // const courses = await Course.find({ category }).sort({ createdAt: -1 });
-      
+
       const courses = sampleCourses.filter(c => c.category === category);
-      
+
       res.json({
         message: 'Courses fetched successfully',
         courses
@@ -173,7 +177,7 @@ const courseController = {
   searchCourses: async (req, res) => {
     try {
       const { q } = req.query;
-      
+
       if (!q) {
         return res.status(400).json({ message: 'Search query is required' });
       }
@@ -191,7 +195,7 @@ const courseController = {
         course.title.toLowerCase().includes(q.toLowerCase()) ||
         course.description.toLowerCase().includes(q.toLowerCase())
       );
-      
+
       res.json({
         message: 'Search completed successfully',
         courses
@@ -206,14 +210,14 @@ const courseController = {
     try {
       const { id } = req.params;
       const token = req.headers.authorization?.split(' ')[1];
-      
+
       if (!token) {
         return res.status(401).json({ message: 'No token provided' });
       }
 
       const decoded = jwt.verify(token, JWT_SECRET);
       const user = await User.findById(decoded.userId);
-      
+
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
