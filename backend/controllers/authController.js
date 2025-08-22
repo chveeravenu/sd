@@ -1,11 +1,11 @@
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const JWT_SECRET = 'your-secret-key-here';
 
 const authController = {
-  signup: async (req, res) => {
+    // ... (existing signup function)
+    signup: async (req, res) => {
     try {
       const { name, email, password } = req.body;
 
@@ -46,42 +46,60 @@ const authController = {
     }
   },
 
-  login: async (req, res) => {
-    try {
-      const { email, password } = req.body;
+    login: async (req, res) => {
+        try {
+            const { email, password } = req.body;
+            const user = await User.findOne({ email });
 
-      // Find user
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
+            if (!user) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
 
-      // Check password
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-      }
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(400).json({ message: 'Invalid credentials' });
+            }
 
-      // Generate token
-      const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+            // Logic to update login frequency
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalize to start of day
 
-      res.json({
-        message: 'Login successful',
-        token,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          subscriptionPlan: user.subscriptionPlan
+            const todayLogin = user.loginHistory.find(
+                (entry) => entry.date.toDateString() === today.toDateString()
+            );
+
+            if (todayLogin) {
+                todayLogin.count += 1;
+            } else {
+                user.loginHistory.push({
+                    date: today,
+                    count: 1
+                });
+            }
+
+            await user.save(); // Save the updated user document
+
+            const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+
+            res.json({
+                message: 'Login successful',
+                token,
+                user: {
+                    id: user._id,
+                    name: user.name,
+                    email: user.email,
+                    subscriptionPlan: user.subscriptionPlan
+                }
+            });
+        } catch (error) {
+            console.error('Login error:', error);
+            res.status(500).json({ message: 'Server error' });
         }
-      });
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  },
+    },
 
-  getProfile: async (req, res) => {
+    // ... (existing getProfile function)
+
+      getProfile: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(' ')[1];
       if (!token) {

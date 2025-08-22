@@ -1,21 +1,23 @@
 // ticketController.js
 const Ticket = require('../models/ticketModel');
 
-// Controller function to create a new ticket
 exports.createTicket = async (req, res) => {
     try {
+        const userId = req.userId; // This comes from the authMiddleware
         const { category, subject } = req.body;
         
-        // Create a new ticket instance using the data from the request body
+        if (!userId) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
         const newTicket = new Ticket({
             category,
             subject,
+            user: userId,
         });
 
-        // Save the new ticket to the database
         await newTicket.save();
 
-        // Send a success response back to the client
         res.status(201).json({ 
             message: 'Ticket created successfully!', 
             ticket: newTicket 
@@ -23,7 +25,6 @@ exports.createTicket = async (req, res) => {
 
     } catch (error) {
         console.error('Error creating ticket:', error);
-        // Send an error response
         res.status(500).json({ 
             message: 'Failed to create ticket. Please try again.',
             error: error.message

@@ -10,6 +10,12 @@ const ticketSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    // New field to store the username
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     createdAt: {
         type: Date,
         default: Date.now,

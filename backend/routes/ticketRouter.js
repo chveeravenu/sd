@@ -2,9 +2,8 @@
 const express = require('express');
 const router = express.Router();
 const ticketController = require('../controllers/ticketController');
+const authMiddleware = require('../middleware/auth'); // Make sure this path is correct
 
-// Define the POST route for creating a new ticket
-// The path is relative to the base path defined in server.js (/api/tickets)
-router.post('/', ticketController.createTicket);
+router.post('/', authMiddleware, ticketController.createTicket);
 
 module.exports = router;

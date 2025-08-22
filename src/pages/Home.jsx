@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Play, BookOpen, Award, Users, Star, TrendingUp, X, CheckCircle, XCircle } from 'lucide-react';
+// import TicketFormModal from './components/TicketFormModal'; // Assuming this is the correct path
+import FeedbackModal from '../components/FeedbackModal';
 
-// Ticket form modal component. This is now a separate component.
+// ... TicketFormModal and FeedbackModal components (as you have them)
+
 const TicketFormModal = ({ show, onClose, formData, onFormChange, onSubmit, isSubmitting, submissionStatus, categories }) => {
   if (!show) return null; // Only render if `show` is true
 
@@ -96,76 +99,84 @@ const TicketFormModal = ({ show, onClose, formData, onFormChange, onSubmit, isSu
 
 // Main application component
 const App = () => {
-  // State to control the visibility of the modal.
-  const [showModal, setShowModal] = useState(false);
-  // State to store the form data.
-  const [formData, setFormData] = useState({ category: 'Premium Issue', subject: '' });
-  // State to handle submission status (success, error, loading).
-  const [submissionStatus, setSubmissionStatus] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // State for the ticket modal
+  const [showTicketModal, setShowTicketModal] = useState(false);
+  const [ticketFormData, setTicketFormData] = useState({ category: 'Premium Issue', subject: '' });
+  const [ticketSubmissionStatus, setTicketSubmissionStatus] = useState(null);
+  const [isTicketSubmitting, setIsTicketSubmitting] = useState(false);
 
-  // Function to handle opening the modal.
-  const handleOpenModal = () => {
-    setShowModal(true);
-    // Reset form data and status when opening the modal
-    setFormData({ category: 'Premium Issue', subject: '' });
-    setSubmissionStatus(null);
-  };
+  // State for the new feedback modal
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackFormData, setFeedbackFormData] = useState({ rating: 0, description: '' });
+  const [feedbackSubmissionStatus, setFeedbackSubmissionStatus] = useState(null);
+  const [isFeedbackSubmitting, setIsFeedbackSubmitting] = useState(false);
 
-  // Function to handle closing the modal.
-  const handleCloseModal = () => {
-    setShowModal(false);
-  };
-  
-  // Array of ticket categories for the dropdown.
-  const categories = [
-    'Premium Issue',
-    'Payment Issue',
-    'Video Issue',
-    'Course Content',
-    'Technical Support',
-    'Other'
-  ];
-
-  // Function to handle form field changes.
-  const handleFormChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  // Function to handle form submission.
-  const handleSubmit = async (e) => {
+  // Ticket form logic
+  const handleOpenTicketModal = () => setShowTicketModal(true);
+  const handleCloseTicketModal = () => setShowTicketModal(false);
+  const handleTicketFormChange = (e) => setTicketFormData({ ...ticketFormData, [e.target.name]: e.target.value });
+  const handleTicketSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitting(true);
-    setSubmissionStatus(null);
-
-    // This is the updated fetch call, pointing to your backend server
+    setIsTicketSubmitting(true);
+    setTicketSubmissionStatus(null);
+    const token = localStorage.getItem('token');
+    if (!token) {
+        setTicketSubmissionStatus('error');
+        setIsTicketSubmitting(false);
+        return;
+    }
     try {
-      const response = await fetch('http://localhost:4000/tickets', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        setSubmissionStatus('success');
-      } else {
-        setSubmissionStatus('error');
-      }
+        const response = await fetch('http://localhost:4000/tickets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(ticketFormData),
+        });
+        if (response.ok) {
+            setTicketSubmissionStatus('success');
+        } else {
+            setTicketSubmissionStatus('error');
+        }
     } catch (error) {
-      console.error('Submission failed:', error);
-      setSubmissionStatus('error');
+        setTicketSubmissionStatus('error');
     } finally {
-      setIsSubmitting(false);
-      // Automatically hide the message after a few seconds
-      setTimeout(() => {
-        setSubmissionStatus(null);
-        handleCloseModal();
-      }, 3000);
+        setIsTicketSubmitting(false);
+        setTimeout(() => { setTicketSubmissionStatus(null); handleCloseTicketModal(); }, 3000);
     }
   };
-  
+
+  // New feedback form logic
+  const handleOpenFeedbackModal = () => setShowFeedbackModal(true);
+  const handleCloseFeedbackModal = () => setShowFeedbackModal(false);
+  const handleFeedbackFormChange = (e) => setFeedbackFormData({ ...feedbackFormData, [e.target.name]: e.target.value });
+  const handleFeedbackSubmit = async (e) => {
+    e.preventDefault();
+    setIsFeedbackSubmitting(true);
+    setFeedbackSubmissionStatus(null);
+    const token = localStorage.getItem('token');
+    if (!token) {
+        setFeedbackSubmissionStatus('error');
+        setIsFeedbackSubmitting(false);
+        return;
+    }
+    try {
+        const response = await fetch('http://localhost:4000/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(feedbackFormData),
+        });
+        if (response.ok) {
+            setFeedbackSubmissionStatus('success');
+        } else {
+            setFeedbackSubmissionStatus('error');
+        }
+    } catch (error) {
+        setFeedbackSubmissionStatus('error');
+    } finally {
+        setIsFeedbackSubmitting(false);
+        setTimeout(() => { setFeedbackSubmissionStatus(null); handleCloseFeedbackModal(); }, 3000);
+    }
+  };
+
   return (
     <div className="bg-white text-gray-800 font-sans">
       {/* Hero Section */}
@@ -190,7 +201,7 @@ const App = () => {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 md:py-24 bg-gray-50">
+        <section className="py-16 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl md:text-4xl font-extrabold text-center mb-12">
             Why Choose LearnHub?
@@ -303,26 +314,46 @@ const App = () => {
         </div>
       </section>
 
-      {/* Floating Raise Ticket Button */}
-      <div className="fixed bottom-6 right-6">
-        <button
-          onClick={handleOpenModal}
-          className="flex items-center space-x-2 px-6 py-3 rounded-full shadow-lg text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <span>Raise a Ticket</span>
-        </button>
+      {/* Floating Buttons Container */}
+      <div className="fixed bottom-6 w-full flex justify-between px-6">
+          <button
+              onClick={handleOpenFeedbackModal}
+              className="flex items-center space-x-2 px-6 py-3 rounded-full shadow-lg text-lg font-semibold text-white bg-green-600 hover:bg-green-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+          >
+              <span>Give Feedback</span>
+          </button>
+          <button
+              onClick={handleOpenTicketModal}
+              className="flex items-center space-x-2 px-6 py-3 rounded-full shadow-lg text-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+              <span>Raise a Ticket</span>
+          </button>
       </div>
 
-      {/* Conditionally render the modal by passing props */}
+      {/* Ticket Modal */}
       <TicketFormModal
-        show={showModal}
-        onClose={handleCloseModal}
-        formData={formData}
-        onFormChange={handleFormChange}
-        onSubmit={handleSubmit}
-        isSubmitting={isSubmitting}
-        submissionStatus={submissionStatus}
-        categories={categories}
+          show={showTicketModal}
+          onClose={handleCloseTicketModal}
+          formData={ticketFormData}
+          onFormChange={handleTicketFormChange}
+          onSubmit={handleTicketSubmit}
+          isSubmitting={isTicketSubmitting}
+          submissionStatus={ticketSubmissionStatus}
+          categories={[
+              'Premium Issue', 'Payment Issue', 'Video Issue', 
+              'Course Content', 'Technical Support', 'Other'
+          ]}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+          show={showFeedbackModal}
+          onClose={handleCloseFeedbackModal}
+          formData={feedbackFormData}
+          onFormChange={handleFeedbackFormChange}
+          onSubmit={handleFeedbackSubmit}
+          isSubmitting={isFeedbackSubmitting}
+          submissionStatus={feedbackSubmissionStatus}
       />
     </div>
   );

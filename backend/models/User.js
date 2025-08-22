@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  name: {
+   name: {
     type: String,
     required: true,
     trim: true
@@ -55,8 +55,19 @@ const userSchema = new mongoose.Schema({
   },
   totalLearningTime: {
     type: Number,
-    default: 0 // in minutes
-  }
+    default: 0
+  },
+  // New field to store login frequency
+  loginHistory: [{
+    date: {
+      type: Date,
+      required: true
+    },
+    count: {
+      type: Number,
+      default: 0
+    }
+  }]
 }, {
   timestamps: true
 });

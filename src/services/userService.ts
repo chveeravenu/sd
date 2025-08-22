@@ -17,6 +17,13 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// Define the interface for the user data
+interface UserData {
+  name?: string;
+  email?: string;
+  // Add any other profile fields that can be updated
+}
+
 export const userService = {
   getUserProfile: () => {
     return api.get('/user/profile');
@@ -30,7 +37,12 @@ export const userService = {
     return api.get('/user/enrolled-courses');
   },
 
-  updateProfile: (userData: any) => {
+  // Add the type to the userData parameter
+  updateProfile: (userData: UserData) => {
     return api.put('/user/profile', userData);
+  },
+
+  updateLoginHistory: () => {
+    return api.post('/user/update-login-history');
   }
 };
